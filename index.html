@@ -81,9 +81,9 @@ async function groupMessage(){
  finally{btn.disabled=false;btn.textContent=oldText}
 }
 // Checkout behavior
-document.querySelectorAll('input[name="fulfillment"]').forEach(r=>r.addEventListener('change',()=>{const delivery=document.querySelector('input[name="fulfillment"]:checked').value==='Delivery';document.getElementById('deliveryAddress').classList.toggle('hidden',!delivery)}));
-document.querySelectorAll('input[name="payment"]').forEach(r=>r.addEventListener('change',()=>{const cash=document.querySelector('input[name="payment"]:checked').value==='Dinheiro';document.getElementById('changeField').classList.toggle('hidden',!cash)}));
+document.querySelectorAll('input[name="fulfillment"]').forEach(r=>r.addEventListener('change',()=>{const checked=document.querySelector('input[name="fulfillment"]:checked');const address=document.getElementById('deliveryAddress');if(!checked||!address)return;address.classList.toggle('hidden',checked.value!=='Delivery')}));
+document.querySelectorAll('input[name="payment"]').forEach(r=>r.addEventListener('change',()=>{const checked=document.querySelector('input[name="payment"]:checked');const field=document.getElementById('changeField');if(!checked||!field)return;field.classList.toggle('hidden',checked.value!=='Dinheiro')}));
 // Product search
-const search=document.getElementById('productSearch');search.addEventListener('input',()=>{const q=search.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');let visible=0;document.querySelectorAll('.item').forEach(el=>{const hay=(el.dataset.name+' '+el.dataset.cat+' '+(el.querySelector('.desc')?.textContent||'')).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');const show=hay.includes(q);el.style.display=show?'':'none';if(show)visible++});document.getElementById('emptySearch').style.display=visible?'none':'block'});
-document.getElementById('sendWa').onclick=groupMessage;sync();
+const search=document.getElementById('productSearch');if(search) search.addEventListener('input',()=>{const q=search.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');let visible=0;document.querySelectorAll('.item').forEach(el=>{const hay=(el.dataset.name+' '+el.dataset.cat+' '+(el.querySelector('.desc')?.textContent||'')).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');const show=hay.includes(q);el.style.display=show?'':'none';if(show)visible++});(()=>{const e=document.getElementById('emptySearch');if(e)e.style.display=visible?'none':'block'})()});
+const sendWa=document.getElementById('sendWa');if(sendWa)sendWa.addEventListener('click',groupMessage);sync();
 </script></body></html>
