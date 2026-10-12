@@ -421,13 +421,27 @@ async function groupMessage(){
      body:JSON.stringify(payload)
    });
    if(!res.ok){throw new Error(await res.text())}
-   let groups={};arr.forEach(x=>(groups[x.cat]??=[]).push(x));
-   let lines=['Olá! Tudo bem? 😊','Gostaria de fazer um pedido pelo cardápio digital do Pai D’Égua.','',`👤 *CLIENTE:* ${name}`,`📱 *TELEFONE:* ${phone}`,`📦 *TIPO DO PEDIDO:* ${fulfillment}`];
-   if(fulfillment==='Delivery'){lines.push(`📍 *ENDEREÇO:* ${address}`);lines.push(`📌 *LOCALIZAÇÃO GPS:* https://www.google.com/maps?q=${deliveryLocation.lat},${deliveryLocation.lon}`);lines.push(`🛵 *DISTÂNCIA EM LINHA RETA:* ${deliveryLocation.km.toFixed(2).replace('.',',')} km`);lines.push(`🛵 *TAXA DE ENTREGA:* ${money(fee)}`)} else lines.push('📍 *RETIRADA:* Rua Graça Aranha, 1066 — Álvaro Weyne, Fortaleza');
-   lines.push(`💳 *PAGAMENTO NO ${fulfillment==='Delivery'?'ATO DA ENTREGA':'BALCÃO'}:* ${payment}`);if(payment==='Pix')lines.push('📲 Gerar QR Code Pix na maquininha.');if(payment.startsWith('Cartão'))lines.push('💳 Levar maquininha.'); if(payment==='Dinheiro') lines.push(`💵 *TROCO:* ${change||'Não preciso de troco'}`); lines.push('','🧾 *ITENS DO PEDIDO*');
-   for(let [cat,items] of Object.entries(groups)){lines.push(`\n*${cat.toUpperCase()}*`);items.forEach(x=>lines.push(`• ${x.qty}x ${x.name}${x.variant?' — '+x.variant:''} — ${money(x.qty*x.price)}`))}
-   if(obs){lines.push('','📝 *OBSERVAÇÕES*',obs)}
-   lines.push('','💰 *TOTAL ESTIMADO: '+money(orderTotal)+'*','','✅ Pedido registrado no sistema. Aguardo a confirmação. Obrigado! 🙏');
+   const lines=[
+     '🍔 *PEDIDO PAI D’ÉGUA*',
+     '',
+     `👤 ${name}`,
+     `📱 ${phone}`,
+     `📦 ${fulfillment==='Delivery'?'ENTREGA':'RETIRADA'}`,
+     '',
+     '*ITENS*',
+     ...arr.map(x=>`• ${x.qty}x ${x.name}${x.variant?' ('+x.variant+')':''} — ${money(x.qty*x.price)}`)
+   ];
+   if(obs)lines.push(`📝 Obs.: ${obs}`);
+   if(fulfillment==='Delivery'){
+     lines.push(`📍 ${address}`);
+     lines.push(`🗺️ Localização: https://www.google.com/maps?q=${deliveryLocation.lat},${deliveryLocation.lon}`);
+     lines.push(`🛵 Taxa: ${money(fee)}`);
+   }
+   lines.push('');
+   lines.push(`💰 *TOTAL: ${money(orderTotal)}*`);
+   lines.push(`💳 Pagamento: ${payment}${fulfillment==='Delivery'?' na entrega':' na retirada'}`);
+   lines.push('⏱️ Tempo estimado: 40 minutos');
+   if(payment==='Dinheiro')lines.push(`💵 Troco: ${change||'Não precisa'}`);
    const url=`https://wa.me/${PHONE}?text=${encodeURIComponent(lines.join('\n'))}`;
    status.hidden=false;status.textContent='Pedido registrado. ';const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Abrir pedido no WhatsApp';status.append(link);
    if(waWindow&&!waWindow.closed)waWindow.location.replace(url);
